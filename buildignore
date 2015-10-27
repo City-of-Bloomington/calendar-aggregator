@@ -1,0 +1,12 @@
+/buildignore
+/build.sh
+/build
+/dist
+.git/
+.git*
+configuration.inc
+site_config.inc
+/data/sessions/*
+/data/templates/
+/data/blocks/
+/scripts/backup.cnf
