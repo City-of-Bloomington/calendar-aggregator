@@ -27,6 +27,9 @@ define('DB_NAME','application');
 define('DB_USER','application');
 define('DB_PASS','password');
 
+define('GOOGLE_CREDENTIALS_FILE', __DIR__.'/credentials.json');
+define('GOOGLE_USER_EMAIL', 'username@gmail.com');
+
 /**
  * Directory Configuration
  *

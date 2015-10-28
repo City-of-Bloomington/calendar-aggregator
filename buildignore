@@ -6,7 +6,11 @@
 .git*
 configuration.inc
 site_config.inc
+credentials.json
 /data/sessions/*
 /data/templates/
 /data/blocks/
 /scripts/backup.cnf
+/vendor/google/apiclient/examples
+/vendor/google/apiclient/style
+/vendor/google/apiclient/tests

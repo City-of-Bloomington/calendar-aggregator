@@ -69,6 +69,7 @@ $config = [
 	]
 ];
 Zend\Loader\AutoloaderFactory::factory($config);
+require_once APPLICATION_HOME.'/vendor/google/apiclient/src/Google/autoload.php';
 
 include APPLICATION_HOME.'/routes.inc';
 include APPLICATION_HOME.'/access_control.inc';
