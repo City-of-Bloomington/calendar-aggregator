@@ -21,7 +21,6 @@ if (Person::isAllowed('aggregations', 'update')) {
 }
 ?>
 <section>
-    <h1><?= $name; ?></h1>
     <div class="tools"><?= $editButton; ?></div>
-    <h2><?= $google_calendar_id; ?></h2>
+    <iframe src="//www.google.com/calendar/embed?src=<?= $google_calendar_id; ?>" style="border: 0" width="700" height="600" frameborder="0" scrolling="no"></iframe>
 </section>
