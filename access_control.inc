@@ -22,6 +22,8 @@ $ZEND_ACL->addResource(new Resource('people'));
 $ZEND_ACL->addResource(new Resource('users'));
 $ZEND_ACL->addResource(new Resource('login'));
 
+$ZEND_ACL->addResource(new Resource('aggregations'));
+
 /**
  * Assign permissions to the resources
  */
@@ -34,6 +36,7 @@ $ZEND_ACL->allow(null,
 
 // Allow Staff to do stuff
 $ZEND_ACL->allow('Staff', ['people'], ['index','view']);
+$ZEND_ACL->allow('Staff', ['aggregations'], ['index','view', 'update']);
 
 
 // Administrator is allowed access to everything

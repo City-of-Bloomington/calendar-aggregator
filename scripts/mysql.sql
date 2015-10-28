@@ -1,4 +1,4 @@
--- @copyright 2006-2012 City of Bloomington, Indiana
+-- @copyright 2015 City of Bloomington, Indiana
 -- @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.txt
 -- @author Cliff Ingham <inghamn@bloomington.in.gov>
 create table people (
@@ -10,4 +10,17 @@ create table people (
 	password varchar(40),
 	authenticationMethod varchar(40),
 	role varchar(30)
+);
+
+create table aggregations (
+    id int unsigned not null primary key auto_increment,
+    name varchar(128) not null,
+    google_calendar_id varchar(128) not null
+);
+
+create table aggregatedCalendars (
+    aggregation_id int unsigned not null,
+    name varchar(128) not null,
+    google_calendar_id varchar(128) not null,
+    foreign key (aggregation_id) references aggregations(id)
 );

@@ -1,12 +1,12 @@
 <?php
-define('APPLICATION_NAME','application');
+define('APPLICATION_NAME','Calendars');
 
 /**
  * The URL to get to this site
  * Do NOT use a trailing slash
  */
-define('BASE_URL','http://localhost/application');
-define('BASE_URI','/application');
+define('BASE_URL','http://localhost/calendars');
+define('BASE_URI','/calendars');
 
 /**
  * Used when there's an error on the site.  The Framework will
@@ -23,8 +23,8 @@ define('ADMINISTRATOR_EMAIL','admin@servername.com');
  */
 define('DB_ADAPTER','Pdo_Mysql');
 define('DB_HOST','localhost');
-define('DB_NAME','application');
-define('DB_USER','application');
+define('DB_NAME','calendars');
+define('DB_USER','calendars');
 define('DB_PASS','password');
 
 define('GOOGLE_CREDENTIALS_FILE', __DIR__.'/credentials.json');

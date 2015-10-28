@@ -35,6 +35,7 @@ class GoogleGateway
             $credentials->sub = GOOGLE_USER_EMAIL;
 
             $client = new \Google_Client();
+            $client->setClassConfig('Google_Cache_File', 'directory', SITE_HOME.'/Google_Client');
             $client->setAssertionCredentials($credentials);
             if ($client->getAuth()->isAccessTokenExpired()) {
                 $client->getAuth()->refreshTokenWithAssertion();

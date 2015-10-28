@@ -17,6 +17,15 @@ $ROUTES->attach('login', '/login', function ($r) {
     $r->add('logout', '/logout')->addValues(['action'=>'logout']);
 });
 
+$ROUTES->attach('aggregations', '/aggregations', function ($r) {
+    $r->setTokens(['id'=>'[0-9]+']);
+    $r->setValues(['controller'=>'aggregations']);
+
+    $r->add('index',  '')            ->addValues(['action'=>'index' ]);
+    $r->add('view',   '/{id}')       ->addValues(['action'=>'view'  ]);
+    $r->add('update', '/update{/id}')->addValues(['action'=>'update']);
+});
+
 $ROUTES->attach('people', '/people', function ($r) {
     $r->setTokens(['id'=>'[0-9]+']);
     $r->setValues(['controller'=>'people']);
