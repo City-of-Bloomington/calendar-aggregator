@@ -60,7 +60,8 @@ class Aggregation extends ActiveRecord
         }
 	}
 
-	public function save() { parent::save(); }
+	public function save  () { parent::save(); }
+	public function delete() { parent::delete(); }
 
 	//----------------------------------------------------------------
 	// Generic Getters & Setters

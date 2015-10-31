@@ -37,6 +37,7 @@ if ($route) {
         }
         else {
             header('HTTP/1.1 403 Forbidden', true, 403);
+            $template->blocks[] = new Block('errorMessages/noAccessAllowed.inc');
         }
     }
 }

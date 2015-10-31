@@ -63,4 +63,17 @@ class AggregationsController extends Controller
 
         $this->template->blocks[] = new Block('aggregations/updateForm.inc', ['aggregation'=>$aggregation]);
     }
+
+    public function delete()
+    {
+        if (!empty($_REQUEST['id'])) {
+            try {
+                $aggregation = new Aggregation($_GET['id']);
+                $aggregation->delete();
+            }
+            catch (\Exception $e) { $_SESSION['errorMessages'][] = $e; }
+        }
+        header('Location: '.View::generateUrl('aggregations.index'));
+        exit();
+    }
 }

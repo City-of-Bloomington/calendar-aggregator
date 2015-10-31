@@ -24,6 +24,7 @@ $ROUTES->attach('aggregations', '/aggregations', function ($r) {
     $r->add('index',  '')            ->addValues(['action'=>'index' ]);
     $r->add('view',   '/{id}')       ->addValues(['action'=>'view'  ]);
     $r->add('update', '/update{/id}')->addValues(['action'=>'update']);
+    $r->add('delete', '/delete/{id}')->addValues(['action'=>'delete']);
 });
 
 $ROUTES->attach('people', '/people', function ($r) {

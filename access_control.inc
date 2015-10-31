@@ -30,13 +30,12 @@ $ZEND_ACL->addResource(new Resource('aggregations'));
 $ZEND_ACL->allow(null,'login');
 
 // Permissions for unauthenticated browsing
-$ZEND_ACL->allow(null,
-				['index'],
-				['index']);
+$ZEND_ACL->allow(null, ['index'], ['index']);
+$ZEND_ACL->allow(null, ['aggregations'], ['index', 'view']);
 
 // Allow Staff to do stuff
 $ZEND_ACL->allow('Staff', ['people'], ['index','view']);
-$ZEND_ACL->allow('Staff', ['aggregations'], ['index','view', 'update']);
+$ZEND_ACL->allow('Staff', ['aggregations'], ['update']);
 
 
 // Administrator is allowed access to everything
