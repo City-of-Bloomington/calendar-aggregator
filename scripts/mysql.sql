@@ -19,6 +19,7 @@ create table aggregations (
 );
 
 create table aggregatedCalendars (
+    id int unsigned not null primary key auto_increment,
     aggregation_id int unsigned not null,
     name varchar(128) not null,
     google_calendar_id varchar(128) not null,

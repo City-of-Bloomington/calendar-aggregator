@@ -8,11 +8,11 @@ namespace Application\Models;
 use Blossom\Classes\ActiveRecord;
 use Blossom\Classes\Database;
 
-class Aggregation extends ActiveRecord
+class AggregatedCalendar extends ActiveRecord
 {
     use GoogleCalendarFields;
-    
-    protected $tablename = 'aggregations';
+
+    protected $tablename = 'aggregatedCalendars';
 
 	/**
 	 * Populates the object with data
@@ -34,18 +34,13 @@ class Aggregation extends ActiveRecord
 			}
 			else {
 				$zend_db = Database::getConnection();
-				if (ActiveRecord::isId($id)) {
-					$sql = 'select * from aggregations where id=?';
-				}
-				else {
-					$sql = 'select * from aggregations where google_calendar_id=?';
-				}
+                $sql = 'select * from aggregatedCalendars where id=?';
 				$result = $zend_db->createStatement($sql)->execute([$id]);
 				if (count($result)) {
 					$this->exchangeArray($result->current());
 				}
 				else {
-					throw new \Exception('aggregations/unknown');
+					throw new \Exception('aggregatedCalendars/unknown');
 				}
 			}
 		}
@@ -57,7 +52,7 @@ class Aggregation extends ActiveRecord
 
 	public function validate()
 	{
-        if (!$this->getName() || !$this->getGoogle_calendar_id()) {
+        if (!$this->getAggregation_id() || !$this->getName() || !$this->getGoogle_calendar_id()) {
             throw new \Exception('missingRequiredFields');
         }
 	}
@@ -68,27 +63,17 @@ class Aggregation extends ActiveRecord
 	//----------------------------------------------------------------
 	// Generic Getters & Setters
 	//----------------------------------------------------------------
-	public function getId()                 { return parent::get('id'); }
+	public function getId()             { return parent::get('id'); }
+	public function getAggregation_id() { return parent::get('aggregation_id'); }
+	public function getAggregation()    { return parent::getForeignKeyObject(__namespace__.'\Aggregation', 'aggregation_id'); }
+
+	public function setAggregation_id($i) { parent::setForeignKeyField (__namespace__.'\Aggregation', 'aggregation_id', $i); }
+	public function setAggregation   ($o) { parent::setForeignKeyObject(__namespace__.'\Aggregation', 'aggregation_id', $o); }
 
 	public function handleUpdate($post)
 	{
+        $this->setAggregation_id($post['aggregation_id']);
         $this->setGoogle_calendar_id($post['google_calendar_id']);
 	}
 
-	//----------------------------------------------------------------
-	// Custom functions
-	//----------------------------------------------------------------
-	public function getAggregatedCalendars()
-	{
-        $calendars = [];
-        if ($this->getId()) {
-            $zend_db = Database::getConnection();
-            $sql = 'select * from aggregatedCalendars where aggregation_id=?';
-            $result = $zend_db->createStatement($sql)->execute([$this->getId()]);
-            foreach ($result as $row) {
-                $calendars[] = new AggregatedCalendar($row);
-            }
-        }
-        return $calendars;
-	}
 }

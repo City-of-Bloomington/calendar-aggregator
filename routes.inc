@@ -27,6 +27,14 @@ $ROUTES->attach('aggregations', '/aggregations', function ($r) {
     $r->add('delete', '/delete/{id}')->addValues(['action'=>'delete']);
 });
 
+$ROUTES->attach('aggregatedCalendars', '/aggregatedCalendars', function ($r) {
+    $r->setTokens(['id'=>'[0-9]+']);
+    $r->setValues(['controller'=>'aggregatedCalendars']);
+
+    $r->add('update', '/update{/id}')->addValues(['action'=>'update']);
+    $r->add('delete', '/delete/{id}')->addValues(['action'=>'delete']);
+});
+
 $ROUTES->attach('people', '/people', function ($r) {
     $r->setTokens(['id'=>'[0-9]+']);
     $r->setValues(['controller'=>'people']);

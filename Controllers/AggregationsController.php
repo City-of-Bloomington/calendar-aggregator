@@ -33,7 +33,8 @@ class AggregationsController extends Controller
             return;
         }
 
-        $this->template->blocks[] = new Block('aggregations/view.inc', ['aggregation'=>$aggregation]);
+        $this->template->blocks[] = new Block('aggregatedCalendars/list.inc', ['aggregation'=>$aggregation]);
+        $this->template->blocks[] = new Block('aggregations/view.inc',        ['aggregation'=>$aggregation]);
     }
 
     public function update()

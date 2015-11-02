@@ -23,6 +23,7 @@ $ZEND_ACL->addResource(new Resource('users'));
 $ZEND_ACL->addResource(new Resource('login'));
 
 $ZEND_ACL->addResource(new Resource('aggregations'));
+$ZEND_ACL->addResource(new Resource('aggregatedCalendars'));
 
 /**
  * Assign permissions to the resources
