@@ -38,8 +38,8 @@ $helper = $this->template->getHelper('buttonLink');
             }
 
             echo "
-            <tr><td><a href=\"$uri\">$name</a></td>
-                <td><a href=\"$uri\">$google_id</a></td>
+            <tr><td>$name</a></td>
+                <td>$google_id</a></td>
                 <td>$deleteButton</td>
             </tr>
             ";

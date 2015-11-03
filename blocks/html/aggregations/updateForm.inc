@@ -7,7 +7,6 @@
  */
 $title = $this->aggregation->getId() ? $this->_('aggregation_edit') : $this->_('aggregation_add');
 $id = $this->aggregation->getId();
-$google_calendar_id = self::escape($this->aggregation->getGoogle_calendar_id());
 ?>
 <section>
     <h1><?= $title; ?></h1>
@@ -15,10 +14,10 @@ $google_calendar_id = self::escape($this->aggregation->getGoogle_calendar_id());
         <fieldset>
             <input name="id" type="hidden" value="<?= $id; ?>" />
 
-            <dl><dt><label  for="google_calendar_id"><?= $this->_('google_calendar_id'); ?></label></dt>
-                <dd><input name="google_calendar_id" id="google_calendar_id" value="<?= $google_calendar_id; ?>" /></dd>
-            </dl>
             <?php
+                $google_calendar_id = self::escape($this->aggregation->getGoogle_calendar_id());
+                include __DIR__.'/partials/googleCalendarFields.inc';
+
                 $h = $this->template->getHelper('saveAndCancelButtons');
                 $uri = $id
                     ? self::generateUri('aggregations.view', ['id'=>$id])

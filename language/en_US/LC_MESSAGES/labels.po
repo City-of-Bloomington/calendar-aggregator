@@ -114,3 +114,34 @@ msgstr "Delete Account"
 
 msgid "user_info"
 msgstr "Account Info"
+
+msgid "aggregation"
+msgid_plural "aggregations"
+msgstr[0] "Aggregation"
+msgstr[1] "Aggregations"
+
+msgid "aggregation_add"
+msgstr "New Aggregation"
+
+msgid "aggregation_edit"
+msgstr "Edit Aggregation"
+
+msgid "aggregation_delete"
+msgstr "Delete Aggregation"
+
+msgid "aggregatedCalendar"
+msgid_plural "aggregatedCalendars"
+msgstr[0] "Calendar"
+msgstr[1] "Calendars"
+
+msgid "aggregatedCalendar_add"
+msgstr "New Calendar"
+
+msgid "aggregatedCalendar_edit"
+msgstr "Edit Calendar"
+
+msgid "aggregatedCalendar_delete"
+msgstr "Delete Calendar"
+
+msgid "google_calendar_id"
+msgstr "Google Calendar ID"

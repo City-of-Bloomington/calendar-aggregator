@@ -1,0 +1,2 @@
+PHP will store user sessions here.
+Make sure to allow Apache to write files to this directory.
