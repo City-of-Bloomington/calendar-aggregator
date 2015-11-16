@@ -16,7 +16,7 @@ $helper = $this->template->getHelper('buttonLink');
         if (Person::isAllowed('aggregatedCalendars', 'update')) {
             echo $helper->buttonLink(
                 self::generateUri('aggregatedCalendars.update').'?aggregation_id='.$this->aggregation->getId(),
-                $this->_('aggregatedCalendars_add'),
+                $this->_('aggregatedCalendar_add'),
                 'add'
             );
         }

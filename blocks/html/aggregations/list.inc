@@ -15,7 +15,7 @@ use Application\Models\Person;
             $helper = $this->template->getHelper('buttonLink');
             echo $helper->buttonLink(
                 self::generateUri('aggregations.update'),
-                $this->translate('aggregations_add'),
+                $this->translate('aggregation_add'),
                 'add'
             );
         }

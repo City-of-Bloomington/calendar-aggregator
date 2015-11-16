@@ -135,13 +135,13 @@ msgstr[0] "Calendar"
 msgstr[1] "Calendars"
 
 msgid "aggregatedCalendar_add"
-msgstr "New Calendar"
+msgstr "Add Calendar"
 
 msgid "aggregatedCalendar_edit"
 msgstr "Edit Calendar"
 
 msgid "aggregatedCalendar_delete"
-msgstr "Delete Calendar"
+msgstr "Remove Calendar"
 
 msgid "google_calendar_id"
 msgstr "Google Calendar ID"

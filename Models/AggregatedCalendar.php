@@ -13,6 +13,7 @@ class AggregatedCalendar extends ActiveRecord
     use GoogleCalendarFields;
 
     protected $tablename = 'aggregatedCalendars';
+    protected $aggregation;
 
 	/**
 	 * Populates the object with data
@@ -57,8 +58,24 @@ class AggregatedCalendar extends ActiveRecord
         }
 	}
 
-	public function save  () { parent::save(); }
-	public function delete() { parent::delete(); }
+	public function save()
+	{
+        $this->validate();
+
+        if (!$this->getId()) {
+            $this->attendAllEvents();
+        }
+
+        parent::save();
+    }
+
+	public function delete()
+	{
+        $aggregation = $this->getAggregation();
+        GoogleGateway::unattendAllEvents($this->getGoogle_calendar_id(), $aggregation->getGoogle_calendar_id());
+
+        parent::delete();
+	}
 
 	//----------------------------------------------------------------
 	// Generic Getters & Setters
@@ -76,4 +93,28 @@ class AggregatedCalendar extends ActiveRecord
         $this->setGoogle_calendar_id($post['google_calendar_id']);
 	}
 
+	//----------------------------------------------------------------
+	// Custom function
+	//----------------------------------------------------------------
+    public static function generate_uuid() {
+        return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+            mt_rand( 0, 0xffff ),
+            mt_rand( 0, 0x0fff ) | 0x4000,
+            mt_rand( 0, 0x3fff ) | 0x8000,
+            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+        );
+    }
+
+    public function attendAllEvents()
+    {
+        $aggregation = $this->getAggregation();
+
+        $attendee = new \Google_Service_Calendar_EventAttendee([
+            'email'          => $aggregation->getGoogle_calendar_id(),
+            'displayName'    => $aggregation->getName(),
+            'responseStatus' => 'accepted'
+        ]);
+        GoogleGateway::attendAllEvents($this->getGoogle_calendar_id(), $attendee);
+    }
 }

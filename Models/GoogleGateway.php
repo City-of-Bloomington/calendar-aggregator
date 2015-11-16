@@ -19,13 +19,16 @@ class GoogleGateway
 {
     const DATE_FORMAT     = 'Y-m-d';
     const DATETIME_FORMAT = \DateTime::RFC3339;
-    const FIELDS = 'description,end,endTimeUnspecified,iCalUID,id,kind,location,locked,originalStartTime,privateCopy,recurrence,recurringEventId,sequence,source,start,status,summary,transparency,updated,visibility,extendedProperties';
+    const FIELDS = 'description,end,endTimeUnspecified,iCalUID,id,kind,location,locked,'
+                 . 'originalStartTime,privateCopy,recurrence,recurringEventId,sequence,'
+                 . 'creator,organizer,attendees,source,start,status,summary';
 
+    private static $client;
     private static $service;
 
-    public static function getService()
+    public static function getClient()
     {
-        if (!self::$service) {
+        if (!self::$client) {
             $json = json_decode(file_get_contents(GOOGLE_CREDENTIALS_FILE));
             $credentials = new \Google_Auth_AssertionCredentials(
                 $json->client_email,
@@ -34,16 +37,20 @@ class GoogleGateway
             );
             $credentials->sub = GOOGLE_USER_EMAIL;
 
-            $client = new \Google_Client();
-            $client->setClassConfig('Google_Cache_File', 'directory', SITE_HOME.'/Google_Client');
-            $client->setAssertionCredentials($credentials);
-            if ($client->getAuth()->isAccessTokenExpired()) {
-                $client->getAuth()->refreshTokenWithAssertion();
+            self::$client = new \Google_Client();
+            self::$client->setClassConfig('Google_Cache_File', 'directory', SITE_HOME.'/Google_Client');
+            self::$client->setAssertionCredentials($credentials);
+            if (self::$client->getAuth()->isAccessTokenExpired()) {
+                self::$client->getAuth()->refreshTokenWithAssertion();
             }
+        }
+        return self::$client;
+    }
 
-            self::$service = new \Google_Service_Calendar($client);
-
-            //$calendar = new \Google_Service_Calendar($client);
+    public static function getService()
+    {
+        if (!self::$service) {
+             self::$service = new \Google_Service_Calendar(self::getClient());
         }
         return self::$service;
     }
@@ -90,28 +97,7 @@ class GoogleGateway
         if ($start) { $opts['timeMin'] = $start->format(self::DATETIME_FORMAT); }
         if ($end  ) { $opts['timeMax'] = $end  ->format(self::DATETIME_FORMAT); }
 
-        $events = [];
-        // Get all the events from Google Calendar for the date range
-        $list = $service->events->listEvents($calendarId, $opts);
-
-        // Loop through and filter out the events that don't match the filters provided
-        foreach ($list as $e) {
-            $event = new Event($e);
-
-            if (!empty($filters['eventTypes'])) {
-                $t = $event->getEventType();
-                if (!$t || !in_array($t->getCode(), $filters['eventTypes'])) {
-                    continue;
-                }
-            }
-            $events[] = $event;
-        }
-
-        // Sort by datetime
-        usort($events, function ($a, $b) {
-            if ($a->getStartDate() == $b->getStartDate()) { return 0; }
-            return ($a->getStartDate() < $b->getStartDate()) ? -1 : 1;
-        });
+        $events = $service->events->listEvents($calendarId, $opts);
         return $events;
     }
 
@@ -159,106 +145,87 @@ class GoogleGateway
         $service->events->delete($calendarId, $eventId);
     }
 
-    /**
-     * Returns an internal data array for this event
-     *
-     * The return value is the data array to instantiate an
-     * Application\Models\Event
-     *
-     * @return array
-     */
-    public static function createLocalEventData(\Google_Service_Calendar_Event $e)
-    {
-        $data = [];
-        $data['google_event_id'] = !empty($e->recurringEventId) ? $e->recurringEventId : $e->id;
-        $data['location'       ] = $e->location;
-        $data['description'    ] = $e->description;
+	/**
+	 * @param string $calendarId
+	 * @param Google_Service_Calendar_EventAttendee $attendee
+	 */
+	public static function attendAllEvents($calendarId, \Google_Service_Calendar_EventAttendee $attendee)
+	{
+        $service = self::getService();
+        $opts    = [ 'fields' => 'items(attendees,id),nextPageToken' ];
+        $pageToken = 1;
 
-        self::parseSummary($data, $e);
-        self::parseDates  ($data, $e);
+        while  ($pageToken) {
+            if ($pageToken !== 1) { $opts['pageToken'] = $pageToken; }
 
-        $properties = $e->getExtendedProperties();
-        if ($properties) {
-            $shared = $properties->getShared();
-            if (!empty($shared['geography'])  && strlen($shared['geography'])<=1000) {
-                $data['geography'] = $shared['geography'];
-            }
-        }
+            $events = $service->events->listEvents($calendarId, $opts);
 
-        return $data;
-    }
+            foreach ($events as $e) {
+                # Create a patch
+                $attendees = $e->getAttendees();
 
-   /**
-    * Parses structured data out of the summary string
-    */
-    private static function parseSummary(array &$data, \Google_Service_Calendar_Event &$e)
-    {
-        $d = implode('|', Department::codes());
-        if (preg_match("/^($d)(\s+)?-/i", $e->getSummary(), $matches)) {
-            try {
-                $department = new Department(strtoupper($matches[1]));
-                $data['department_id'] = $department->getId();
-            }
-            catch (\Exception $e) {
-            }
-        }
+                if (self::hasAttendee($attendees, $attendee->getEmail()) === false) {
+                    $attendees[] = $attendee;
+                    $patch = new \Google_Service_Calendar_Event();
+                    $patch->setAttendees($attendees);
 
-        $d = implode('|', EventType::names());
-        if (preg_match("/$d/i", $e->getSummary(), $matches)) {
-            $name = ucwords(strtolower($matches[0]));
-            $sql = 'select id from eventTypes where name=?';
-            $zend_db = Database::getConnection();
-            $result = $zend_db->query($sql, [$name]);
-            if (count($result)) {
-                $row = $result->current();
-                $data['eventType_id'] = $row['id'];
-            }
-        }
-
-        if (preg_match('/-([^-]+)$/', $e->getSummary(), $matches)) {
-            $data['title'] = trim($matches[1]);
-        }
-        else {
-            $data['title'] = $e->getSummary();
-        }
-    }
-
-    /**
-     * Populates date time information
-     *
-     * Writes startDate, startTime, endDate, endTime and rrule
-     * into the provided data array from the Google Event.
-     *
-     * @param array $data
-     * @param Google_Service_Calendar_Event $e
-     */
-    public static function parseDates(array &$data, \Google_Service_Calendar_Event &$e)
-    {
-        if ($e->start->dateTime) {
-            $d = new \DateTime($e->start->dateTime);
-            $data['startDate'] = $d->format(ActiveRecord::MYSQL_DATE_FORMAT);
-            $data['startTime'] = $d->format(ActiveRecord::MYSQL_TIME_FORMAT);
-
-            $d = new \DateTime($e->end->dateTime);
-            $data['endDate']   = $d->format(ActiveRecord::MYSQL_DATE_FORMAT);
-            $data['endTime']   = $d->format(ActiveRecord::MYSQL_TIME_FORMAT);
-        }
-        else {
-            // All Day Event
-            $d = new \DateTime($e->start->date);
-            $data['startDate'] = $d->format(ActiveRecord::MYSQL_DATE_FORMAT);
-
-            $d = new \DateTime($e->end->date.' 23:59:59');
-            $data['endDate']   = $d->format(ActiveRecord::MYSQL_DATETIME_FORMAT);
-        }
-        if ($e->recurrence) {
-            foreach ($e->recurrence as $r) {
-                if (strpos($r, 'RRULE:') !== false) {
-                    $rrule = substr($r, 6);
-                    $rule = new Rule($rrule);
-                    $data['rrule'] = $rule->getString(Rule::TZ_FIXED);
+                    $response = $service->events->patch($calendarId, $e->id, $patch);
+                    if (!$response instanceof \Google_Service_Calendar_Event) {
+                        // Ignore patching errors for right now.
+                        // I'm not sure what we would want to do if one of the updates
+                        // errors out.
+                    }
                 }
             }
+            $pageToken = $events->getNextPageToken();
         }
+	}
+
+	/**
+	 * @param string $calendarId Calendar that has the events
+	 * @param string $email Email of calendar to unattend
+	 */
+	public static function unattendAllEvents($calendarId, $email)
+	{
+        $service = self::getService();
+        $opts    = [ 'fields' => 'items(attendees,id),nextPageToken' ];
+        $pageToken = 1;
+
+        while ($pageToken) {
+            if ($pageToken !== 1) { $opts['pageToken'] = $pageToken; }
+
+            $events = $service->events->listEvents($calendarId, $opts);
+
+            foreach ($events as $e) {
+                $attendees = $e->getAttendees();
+                $i = self::hasAttendee($attendees, $email);
+                if ($i !== false) {
+                    unset($attendees[$i]);
+                    $patch = new \Google_Service_Calendar_Event();
+                    $patch->setAttendees($attendees);
+
+                    $response = $service->events->patch($calendarId, $e->id, $patch);
+                    if (!$response instanceof \Google_Service_Calendar_Event) {
+                        // Ignore patching errors for right now.
+                        // I'm not sure what we would want to do if one of the updates
+                        // errors out.
+                    }
+                }
+            }
+            $pageToken = $events->getNextPageToken();
+        }
+	}
+
+    /**
+     * @param array $attendees
+     * @param string $email
+     * @return int Index for the email in the attendees array
+     */
+    private static function hasAttendee($attendees, $email)
+    {
+        foreach ($attendees as $i => $a) {
+            if ($a->getEmail() === $email) { return $i; }
+        }
+        return false;
     }
 }

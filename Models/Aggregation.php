@@ -11,7 +11,7 @@ use Blossom\Classes\Database;
 class Aggregation extends ActiveRecord
 {
     use GoogleCalendarFields;
-    
+
     protected $tablename = 'aggregations';
 
 	/**
@@ -80,15 +80,7 @@ class Aggregation extends ActiveRecord
 	//----------------------------------------------------------------
 	public function getAggregatedCalendars()
 	{
-        $calendars = [];
-        if ($this->getId()) {
-            $zend_db = Database::getConnection();
-            $sql = 'select * from aggregatedCalendars where aggregation_id=?';
-            $result = $zend_db->createStatement($sql)->execute([$this->getId()]);
-            foreach ($result as $row) {
-                $calendars[] = new AggregatedCalendar($row);
-            }
-        }
-        return $calendars;
+        $table = new AggregatedCalendarsTable();
+        return $table->find(['aggregation_id'=>$this->getId()]);
 	}
 }
