@@ -62,9 +62,7 @@ class AggregatedCalendar extends ActiveRecord
 	{
         $this->validate();
 
-        if (!$this->getId()) {
-            $this->attendAllEvents();
-        }
+        $this->attendAllEvents();
 
         parent::save();
     }
