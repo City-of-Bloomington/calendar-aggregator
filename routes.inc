@@ -25,6 +25,7 @@ $ROUTES->attach('aggregations', '/aggregations', function ($r) {
     $r->add('view',   '/{id}')       ->addValues(['action'=>'view'  ]);
     $r->add('update', '/update{/id}')->addValues(['action'=>'update']);
     $r->add('delete', '/delete/{id}')->addValues(['action'=>'delete']);
+    $r->add('sync',   '/sync/{id}')  ->addValues(['action'=>'sync'  ]);
 });
 
 $ROUTES->attach('aggregatedCalendars', '/aggregatedCalendars', function ($r) {

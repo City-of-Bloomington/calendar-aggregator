@@ -145,3 +145,6 @@ msgstr "Remove Calendar"
 
 msgid "google_calendar_id"
 msgstr "Google Calendar ID"
+
+msgid "synchronize"
+msgstr "Synchronize"

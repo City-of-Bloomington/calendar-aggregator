@@ -83,4 +83,11 @@ class Aggregation extends ActiveRecord
         $table = new AggregatedCalendarsTable();
         return $table->find(['aggregation_id'=>$this->getId()]);
 	}
+
+	public function sync()
+	{
+        foreach ($this->getAggregatedCalendars() as $calendar) {
+            $calendar->attendAllEvents();
+        }
+	}
 }

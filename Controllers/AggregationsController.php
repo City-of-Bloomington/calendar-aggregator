@@ -77,4 +77,20 @@ class AggregationsController extends Controller
         header('Location: '.View::generateUrl('aggregations.index'));
         exit();
     }
+
+    public function sync()
+    {
+        if (!empty($_REQUEST['id'])) {
+            try {
+                $a = new Aggregation($_REQUEST['id']);
+                $a->sync();
+                header('Location: '.View::generateUrl('aggregations.view', ['id'=>$a->getId()]));
+                exit();
+            }
+            catch (\Exception $e) { $_SESSION['errorMessages'][] = $e; }
+        }
+        header('HTTP/1.1 404 Not Found', true, 404);
+        $this->template->blocks[] = new Block('404.inc');
+        return;
+    }
 }

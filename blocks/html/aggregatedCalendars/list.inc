@@ -20,6 +20,14 @@ $helper = $this->template->getHelper('buttonLink');
                 'add'
             );
         }
+
+        if (Person::isAllowed('aggregations', 'sync')) {
+            echo $helper->buttonLink(
+                self::generateUri('aggregations.sync', ['id'=>$this->aggregation->getId()]),
+                $this->_('synchronize'),
+                'synchronize'
+            );
+        }
     ?>
     </div>
     <table>
