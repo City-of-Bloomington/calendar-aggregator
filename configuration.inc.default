@@ -65,11 +65,12 @@ if (!defined('STDIN')) {
  * logging errors to a Skidder server.  You must register for an application_id
  * on the skidder server you want to post errors to.
  */
-#$writer = new Blossom\Classes\Log\SkidderWriter('http://localhost/skidder/home.php', 100 );
-#$logger = new Zend\Log\Logger();
-#$logger->addWriter($writer);
-#Zend\Log\Logger::registerErrorHandler($logger);
-#Zend\Log\Logger::registerExceptionHandler($logger);
+//$writer = new Blossom\Classes\Log\SkidderWriter('http://localhost/skidder/home.php', 100 );
+//$logger = new Zend\Log\Logger();
+//$logger->addWriter($writer);
+//Zend\Log\Logger::registerErrorHandler($logger);
+//Zend\Log\Logger::registerExceptionHandler($logger);
+//Zend\Log\Logger::registerFatalErrorShutdownFunction($logger);
 
 /**
  * Grab a timestamp for calculating process time
