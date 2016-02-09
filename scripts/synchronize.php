@@ -8,7 +8,7 @@ use Application\Models\GoogleGateway;
 use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
 
-include '../configuration.inc';
+include __DIR__.'/../configuration.inc';
 
 $writer = new Stream(SITE_HOME.'/sync_log.txt');
 $logger = new Logger();
