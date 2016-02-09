@@ -1,5 +1,5 @@
 #!/bin/bash
-APPNAME=blossom
+APPNAME=calendars
 DIR=`pwd`
 BUILD=$DIR/build
 

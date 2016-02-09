@@ -5,15 +5,16 @@
  * @see https://developers.google.com/google-apps/calendar/
  * @see https://github.com/google/google-api-php-client
  * @see https://developers.google.com/api-client-library/php/auth/service-accounts
- * @copyright 2015 City of Bloomington, Indiana
+ * @copyright 2015-2016 City of Bloomington, Indiana
  * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE.txt
- * @author Cliff Ingham <inghamn@bloomington.in.gov>
  */
 namespace Application\Models;
 
 use Blossom\Classes\ActiveRecord;
 use Blossom\Classes\Database;
 use Recurr\Rule;
+use Zend\Log\Logger;
+use Zend\Log\LoggerInterface;
 
 class GoogleGateway
 {
@@ -22,6 +23,10 @@ class GoogleGateway
     const FIELDS = 'description,end,endTimeUnspecified,iCalUID,id,kind,location,locked,'
                  . 'originalStartTime,privateCopy,recurrence,recurringEventId,sequence,'
                  . 'creator,organizer,attendees,source,start,status,summary';
+
+    public static $logger;
+    public static function setLogger(LoggerInterface $logger) { self::$logger = $logger; }
+    public static function getLogger() { return self::$logger; }
 
     private static $client;
     private static $service;
@@ -131,8 +136,27 @@ class GoogleGateway
      */
     public static function patchEvent($calendarId, $eventId, \Google_Service_Calendar_Event $patch)
     {
-        $service = self::getService();
-        return $service->events->patch($calendarId, $eventId, $patch);
+        $logger   = self::getLogger();
+        $service  = self::getService();
+        $response = null;
+
+        if ($logger) {
+            $extra = ['calendarId'=>$calendarId, 'eventId'=>$eventId];
+            try {
+                $response = $service->events->patch($calendarId, $eventId, $patch);
+                if (!$response instanceof \Google_Service_Calendar_Event) {
+                    $logger->log(Logger::WARN, 'patch/unknownResponse', $extra);
+                }
+            }
+            catch (\Exception $e) {
+                $logger->log(Logger::ERR, $e->getMessage(), $extra);
+            }
+        }
+        else {
+            $response = $service->events->patch($calendarId, $eventId, $patch);
+        }
+
+        return $response;
     }
 
     /**
@@ -152,7 +176,10 @@ class GoogleGateway
 	public static function attendAllEvents($calendarId, \Google_Service_Calendar_EventAttendee $attendee)
 	{
         $service = self::getService();
-        $opts    = [ 'fields' => 'items(attendees,id),nextPageToken' ];
+        $opts    = [ 'fields'       => 'items(attendees,id),nextPageToken',
+                     'showDeleted'  => true,
+                     'singleEvents' => false
+                   ];
         $pageToken = 1;
 
         while  ($pageToken) {
@@ -160,21 +187,16 @@ class GoogleGateway
 
             $events = $service->events->listEvents($calendarId, $opts);
 
-            foreach ($events as $e) {
+            foreach ($events as $event) {
                 # Create a patch
-                $attendees = $e->getAttendees();
+                $attendees = $event->getAttendees();
 
                 if (self::hasAttendee($attendees, $attendee->getEmail()) === false) {
                     $attendees[] = $attendee;
                     $patch = new \Google_Service_Calendar_Event();
                     $patch->setAttendees($attendees);
 
-                    $response = $service->events->patch($calendarId, $e->id, $patch);
-                    if (!$response instanceof \Google_Service_Calendar_Event) {
-                        // Ignore patching errors for right now.
-                        // I'm not sure what we would want to do if one of the updates
-                        // errors out.
-                    }
+                    self::patchEvent($calendarId, $event->id, $patch);
                 }
             }
             $pageToken = $events->getNextPageToken();
@@ -188,7 +210,10 @@ class GoogleGateway
 	public static function unattendAllEvents($calendarId, $email)
 	{
         $service = self::getService();
-        $opts    = [ 'fields' => 'items(attendees,id),nextPageToken' ];
+        $opts    = [ 'fields'       => 'items(attendees,id),nextPageToken',
+                     'showDeleted'  => true,
+                     'singleEvents' => false
+                   ];
         $pageToken = 1;
 
         while ($pageToken) {
@@ -196,20 +221,15 @@ class GoogleGateway
 
             $events = $service->events->listEvents($calendarId, $opts);
 
-            foreach ($events as $e) {
-                $attendees = $e->getAttendees();
+            foreach ($events as $event) {
+                $attendees = $event->getAttendees();
                 $i = self::hasAttendee($attendees, $email);
                 if ($i !== false) {
                     unset($attendees[$i]);
                     $patch = new \Google_Service_Calendar_Event();
                     $patch->setAttendees($attendees);
 
-                    $response = $service->events->patch($calendarId, $e->id, $patch);
-                    if (!$response instanceof \Google_Service_Calendar_Event) {
-                        // Ignore patching errors for right now.
-                        // I'm not sure what we would want to do if one of the updates
-                        // errors out.
-                    }
+                    self::patchEvent($calendarId, $event->id, $patch);
                 }
             }
             $pageToken = $events->getNextPageToken();
