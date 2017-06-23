@@ -176,7 +176,7 @@ class GoogleGateway
 	public static function attendAllEvents($calendarId, \Google_Service_Calendar_EventAttendee $attendee)
 	{
         $service = self::getService();
-        $opts    = [ 'fields'       => 'items(attendees,id),nextPageToken',
+        $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken',
                      'showDeleted'  => true,
                      'singleEvents' => false
                    ];
@@ -192,11 +192,13 @@ class GoogleGateway
                 $attendees = $event->getAttendees();
 
                 if (self::hasAttendee($attendees, $attendee->getEmail()) === false) {
+                    $organizer = $event->getOrganizer()->getEmail();
+
                     $attendees[] = $attendee;
                     $patch = new \Google_Service_Calendar_Event();
                     $patch->setAttendees($attendees);
 
-                    self::patchEvent($calendarId, $event->id, $patch);
+                    self::patchEvent($organizer, $event->id, $patch);
                 }
             }
             $pageToken = $events->getNextPageToken();
@@ -210,7 +212,7 @@ class GoogleGateway
 	public static function unattendAllEvents($calendarId, $email)
 	{
         $service = self::getService();
-        $opts    = [ 'fields'       => 'items(attendees,id),nextPageToken',
+        $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken',
                      'showDeleted'  => true,
                      'singleEvents' => false
                    ];
@@ -225,11 +227,13 @@ class GoogleGateway
                 $attendees = $event->getAttendees();
                 $i = self::hasAttendee($attendees, $email);
                 if ($i !== false) {
+                    $organizer = $event->getOrganizer()->getEmail();
+
                     unset($attendees[$i]);
                     $patch = new \Google_Service_Calendar_Event();
                     $patch->setAttendees($attendees);
 
-                    self::patchEvent($calendarId, $event->id, $patch);
+                    self::patchEvent($organizer, $event->id, $patch);
                 }
             }
             $pageToken = $events->getNextPageToken();
