@@ -177,7 +177,7 @@ class GoogleGateway
 	{
         $logger  = self::getLogger();
         $service = self::getService();
-        $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken,status',
+        $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken',
                      'showDeleted'  => false,
                      'singleEvents' => false
                    ];
@@ -204,7 +204,7 @@ class GoogleGateway
                     else {
                         $extra = [
                             'calendarId' => $calendarId,
-                            'eventId'      => $event->id
+                            'eventId'    => $event->id
                         ];
                         $logger->log(Logger::ERR, "Event with no organizer", $extra);
                     }
