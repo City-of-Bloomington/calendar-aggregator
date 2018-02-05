@@ -175,9 +175,10 @@ class GoogleGateway
 	 */
 	public static function attendAllEvents($calendarId, \Google_Service_Calendar_EventAttendee $attendee)
 	{
+        $logger  = self::getLogger();
         $service = self::getService();
-        $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken',
-                     'showDeleted'  => true,
+        $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken,status',
+                     'showDeleted'  => false,
                      'singleEvents' => false
                    ];
         $pageToken = 1;
@@ -192,13 +193,21 @@ class GoogleGateway
                 $attendees = $event->getAttendees();
 
                 if (self::hasAttendee($attendees, $attendee->getEmail()) === false) {
-                    $organizer = $event->getOrganizer()->getEmail();
+                    $organizer = $event->getOrganizer();
+                    if ($organizer) {
+                        $attendees[] = $attendee;
+                        $patch = new \Google_Service_Calendar_Event();
+                        $patch->setAttendees($attendees);
 
-                    $attendees[] = $attendee;
-                    $patch = new \Google_Service_Calendar_Event();
-                    $patch->setAttendees($attendees);
-
-                    self::patchEvent($organizer, $event->id, $patch);
+                        self::patchEvent($organizer->getEmail(), $event->id, $patch);
+                    }
+                    else {
+                        $extra = [
+                            'calendarId' => $calendarId,
+                            'eventId'      => $event->id
+                        ];
+                        $logger->log(Logger::ERR, "Event with no organizer", $extra);
+                    }
                 }
             }
             $pageToken = $events->getNextPageToken();
