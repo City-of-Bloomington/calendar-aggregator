@@ -82,3 +82,14 @@ $DIRECTORY_CONFIG = [
 
 define('DATE_FORMAT', 'n/j/Y H:i:s');
 define('LOCALE', 'en_US');
+
+/**
+ * Skidder is a web service for error loggin.  This application supports
+ * logging errors to a Skidder server.  You must register for an application_id
+ * on the skidder server you want to post errors to.
+ */
+#$writer = new Blossom\Classes\Log\SkidderWriter('https://apps.bloomington.in.gov/skidder/index', 3 );
+#$LOGGER = new Zend\Log\Logger();
+#$LOGGER->addWriter($writer);
+#Zend\Log\Logger::registerErrorHandler($LOGGER;
+#Zend\Log\Logger::registerExceptionHandler($LOGGER);

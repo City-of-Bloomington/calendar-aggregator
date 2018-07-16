@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright 2015 City of Bloomington, Indiana
+ * @copyright 2015-2018 City of Bloomington, Indiana
  * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE.txt
  */
 use Application\Models\AggregatedCalendarsTable;
@@ -8,7 +8,7 @@ use Application\Models\GoogleGateway;
 use Zend\Log\Logger;
 use Zend\Log\Writer\Stream;
 
-include __DIR__.'/../configuration.inc';
+include __DIR__.'/../bootstrap.php';
 
 $writer = new Stream(SITE_HOME.'/sync_log.txt');
 $logger = new Logger();
