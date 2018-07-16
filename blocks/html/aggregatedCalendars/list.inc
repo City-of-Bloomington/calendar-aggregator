@@ -1,21 +1,23 @@
 <?php
 /**
- * @copyright 2015 City of Bloomington, Indiana
+ * @copyright 2015-2018 City of Bloomington, Indiana
  * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE.txt
- * @author Cliff Ingham <inghamn@bloomington.in.gov>
  * @param Aggregation $this->aggregation
  */
 use Application\Models\Person;
 
-$helper = $this->template->getHelper('buttonLink');
+$helper    = $this->template->getHelper('buttonLink');
+$calendars = $this->aggregation->getAggregatedCalendars();
+$id        = $this->aggregation->getId();
+$name      = parent::escape($this->aggregation->getName());
 ?>
 <section>
-    <h1><?= $this->_(['aggregatedCalendar', 'aggregatedCalendars', count($this->calendars)]); ?></h1>
+    <h1><?= $name; ?></h1>
     <div class="tools">
     <?php
         if (Person::isAllowed('aggregatedCalendars', 'update')) {
             echo $helper->buttonLink(
-                self::generateUri('aggregatedCalendars.update').'?aggregation_id='.$this->aggregation->getId(),
+                self::generateUri('aggregatedCalendars.update').'?aggregation_id='.$id,
                 $this->_('aggregatedCalendar_add'),
                 'add'
             );
@@ -23,7 +25,7 @@ $helper = $this->template->getHelper('buttonLink');
 
         if (Person::isAllowed('aggregations', 'sync')) {
             echo $helper->buttonLink(
-                self::generateUri('aggregations.sync', ['id'=>$this->aggregation->getId()]),
+                self::generateUri('aggregations.sync', ['id'=>$id]),
                 $this->_('synchronize'),
                 'synchronize'
             );
@@ -32,7 +34,7 @@ $helper = $this->template->getHelper('buttonLink');
     </div>
     <table>
     <?php
-        foreach ($this->aggregation->getAggregatedCalendars() as $a) {
+        foreach ($calendars as $a) {
             $name      = self::escape($a->getName());
             $google_id = self::escape($a->getGoogle_calendar_id());
 
