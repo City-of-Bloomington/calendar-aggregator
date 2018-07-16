@@ -5,7 +5,7 @@
  * @see https://developers.google.com/google-apps/calendar/
  * @see https://github.com/google/google-api-php-client
  * @see https://developers.google.com/api-client-library/php/auth/service-accounts
- * @copyright 2015-2016 City of Bloomington, Indiana
+ * @copyright 2015-2018 City of Bloomington, Indiana
  * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE.txt
  */
 namespace Application\Models;
@@ -24,9 +24,19 @@ class GoogleGateway
                  . 'originalStartTime,privateCopy,recurrence,recurringEventId,sequence,'
                  . 'creator,organizer,attendees,source,start,status,summary';
 
+    const STATUS_CONFIRMED = 'confirmed';
+    const STATUS_CANCELLED = 'cancelled';
+
     public static $logger;
     public static function setLogger(LoggerInterface $logger) { self::$logger = $logger; }
-    public static function getLogger() { return self::$logger; }
+    public static function getLogger() {
+        global $LOGGER;
+
+        if (!self::$logger && isset($LOGGER)) {
+            self::setLogger($LOGGER);
+        }
+        return self::$logger;
+    }
 
     private static $client;
     private static $service;
@@ -177,7 +187,8 @@ class GoogleGateway
 	{
         $logger  = self::getLogger();
         $service = self::getService();
-        $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken',
+
+        $opts    = [ 'fields'       => 'items(attendees,id,organizer,status),nextPageToken',
                      'showDeleted'  => false,
                      'singleEvents' => false
                    ];
@@ -202,11 +213,13 @@ class GoogleGateway
                         self::patchEvent($organizer->getEmail(), $event->id, $patch);
                     }
                     else {
-                        $extra = [
-                            'calendarId' => $calendarId,
-                            'eventId'    => $event->id
-                        ];
-                        $logger->log(Logger::ERR, "Event with no organizer", $extra);
+                        if ($event->getStatus() == self::STATUS_CONFIRMED) {
+                            $extra = [
+                                'calendarId' => $calendarId,
+                                'eventId'    => $event->id
+                            ];
+                            $logger->log(Logger::ERR, "Event with no organizer", $extra);
+                        }
                     }
                 }
             }
