@@ -17,7 +17,6 @@ define('BLOSSOM', APPLICATION_HOME.'/vendor/City-of-Bloomington/blossom-lib');
  * directory would be sufficient for an easy full restore.
  */
 define('SITE_HOME', !empty($_SERVER['SITE_HOME']) ? $_SERVER['SITE_HOME'] : __DIR__.'/data');
-include SITE_HOME.'/site_config.inc';
 
 //-------------------------------------------------------------------
 // Bootstrap code
@@ -26,26 +25,10 @@ include SITE_HOME.'/site_config.inc';
 /**
  * Enable autoloading for the PHP libraries
  */
-require_once APPLICATION_HOME.'/vendor/zendframework/zend-loader/src/AutoloaderFactory.php';
-$config = [
-	'Zend\Loader\StandardAutoloader' => [
-		'namespaces' => [
-			'Application' => APPLICATION_HOME,
-            'Blossom'     => BLOSSOM.'/src',
-            'Aura\Router'          => APPLICATION_HOME.'/vendor/aura/router/src',
-            'Zend\Stdlib'          => APPLICATION_HOME.'/vendor/zendframework/zend-stdlib/src',
-            'Zend\Permissions\Acl' => APPLICATION_HOME.'/vendor/zendframework/zend-permissions-acl/src',
-            'Zend\Paginator'       => APPLICATION_HOME.'/vendor/zendframework/zend-paginator/src',
-            'Zend\Loader'          => APPLICATION_HOME.'/vendor/zendframework/zend-loader/src',
-            'Zend\Log'             => APPLICATION_HOME.'/vendor/zendframework/zend-log/src',
-            'Zend\Hydrator'        => APPLICATION_HOME.'/vendor/zendframework/zend-hydrator/src',
-            'Zend\Db'              => APPLICATION_HOME.'/vendor/zendframework/zend-db/src',
-		]
-	]
-];
-Zend\Loader\AutoloaderFactory::factory($config);
-require_once APPLICATION_HOME.'/vendor/google/apiclient/src/Google/autoload.php';
+$loader = require APPLICATION_HOME.'/vendor/autoload.php';
+$loader->addPsr4('Site\\', SITE_HOME);
 
+include SITE_HOME.'/site_config.inc';
 include APPLICATION_HOME.'/routes.inc';
 include APPLICATION_HOME.'/access_control.inc';
 
@@ -59,18 +42,6 @@ if (!defined('STDIN')) {
 	ini_set('session.cookie_path', BASE_URI);
 	session_start();
 }
-
-/**
- * Skidder is a web service for error loggin.  This application supports
- * logging errors to a Skidder server.  You must register for an application_id
- * on the skidder server you want to post errors to.
- */
-//$writer = new Blossom\Classes\Log\SkidderWriter('http://localhost/skidder/home.php', 100 );
-//$logger = new Zend\Log\Logger();
-//$logger->addWriter($writer);
-//Zend\Log\Logger::registerErrorHandler($logger);
-//Zend\Log\Logger::registerExceptionHandler($logger);
-//Zend\Log\Logger::registerFatalErrorShutdownFunction($logger);
 
 /**
  * Grab a timestamp for calculating process time

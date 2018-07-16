@@ -91,5 +91,5 @@ define('LOCALE', 'en_US');
 #$writer = new Blossom\Classes\Log\SkidderWriter('https://apps.bloomington.in.gov/skidder/index', 3 );
 #$LOGGER = new Zend\Log\Logger();
 #$LOGGER->addWriter($writer);
-#Zend\Log\Logger::registerErrorHandler($LOGGER;
+#Zend\Log\Logger::registerErrorHandler($LOGGER);
 #Zend\Log\Logger::registerExceptionHandler($LOGGER);
