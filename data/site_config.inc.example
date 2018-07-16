@@ -18,14 +18,16 @@ define('ADMINISTRATOR_EMAIL','admin@servername.com');
 
 /**
  * Database Setup
- * Refer to the PDO documentation for DSN sytnax for your database type
- * http://www.php.net/manual/en/pdo.drivers.php
  */
-define('DB_ADAPTER','Pdo_Mysql');
-define('DB_HOST','localhost');
-define('DB_NAME','calendars');
-define('DB_USER','calendars');
-define('DB_PASS','password');
+$DATABASES = [
+    'default' => [
+        'driver'   => 'Pdo_Mysql',
+        'dsn'      => 'mysql:dbname=calendars;host=localhost',
+        'username' => 'calendars',
+        'password' => 'secret password',
+        'options'  => []
+    ]
+];
 
 define('GOOGLE_CREDENTIALS_FILE', __DIR__.'/credentials.json');
 define('GOOGLE_USER_EMAIL', 'username@gmail.com');
