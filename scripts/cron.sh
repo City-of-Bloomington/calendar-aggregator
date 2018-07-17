@@ -8,6 +8,8 @@ MYSQLDUMP=/usr/bin/mysqldump
 MYSQL_CREDENTIALS=/etc/cron.daily/backup.d/$APPLICATION_NAME.cnf
 BACKUP_DIR=/srv/backups/$APPLICATION_NAME
 APPLICATION_HOME=/srv/sites/$APPLICATION_NAME
+SITE_HOME=/srv/data/$APPLICATION_NAME
+LOG=/var/log/cron/$APPLICATION_NAME
 
 MYSQL_DBNAME=$APPLICATION_NAME
 
@@ -20,22 +22,29 @@ num_days_to_keep=5
 now=`date +%s`
 today=`date +%F`
 
+#----------------------------------------------------------
+# Synchronize
+#----------------------------------------------------------
+SITE_HOME=$SITE_HOME php $APPLICATION_HOME/scripts/synchronize.php &> /var/log/cron/$APPLICATION_NAME
+chown -R www-data:staff $SITE_HOME/Google_Client
+
+#----------------------------------------------------------
+# Backup
+#----------------------------------------------------------
 if [ ! -d $BACKUP_DIR ]
 	then mkdir $BACKUP_DIR
 fi
 cd $BACKUP_DIR
-mkdir $today
 
 # Dump the database
-$MYSQLDUMP --defaults-extra-file=$MYSQL_CREDENTIALS $MYSQL_DBNAME > $today/$MYSQL_DBNAME.sql
+$MYSQLDUMP --defaults-extra-file=$MYSQL_CREDENTIALS $MYSQL_DBNAME > $MYSQL_DBNAME.sql
 
 # Copy any data directories into this directory, so they're backed up, too.
 # For example, if we had a media directory....
 #cp -R $APPLICATION_HOME/data/media $today/media
 
 # Tarball the Data
-tar czf $today.tar.gz $today
-rm -Rf $today
+tar czf $today.tar.gz $MYSQL_DBNAME.sql
 
 # Purge any backup tarballs that are too old
 for file in `ls`
