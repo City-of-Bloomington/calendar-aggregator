@@ -1,0 +1,105 @@
+---
+- hosts: "calendars"
+  become: "yes"
+  roles:
+    - "City-of-Bloomington.mysql"
+    - "City-of-Bloomington.php"
+
+  tasks:
+    - name: "Install distro packages for Calendar Aggregator"
+      apt:
+        name: "{{ item }}"
+        state: "present"
+      with_items:
+        - "php-mysql"
+
+    - name: "Create mysql database"
+      mysql_db:
+        config_file: "{{ mysql_defaults_extra_file }}"
+        name: "{{ calendars_db.name }}"
+        state: present
+      no_log: True
+
+    - name: "Create mysql user for site"
+      mysql_user:
+        name:     "{{ calendars_db.user }}"
+        password: "{{ calendars_db.pass }}"
+        priv:     "{{ calendars_db.name }}.*:ALL"
+        state: present
+        config_file: "{{ mysql_defaults_extra_file }}"
+      no_log: True
+
+    - name: "Extract release"
+      unarchive:
+        src: "{{ calendars_archive_path }}"
+        dest: "/usr/local/src"
+      register: release
+
+    - name: "Remove old release"
+      file:
+        path: "{{ calendars_install_path }}"
+        state: "absent"
+      when: release.changed
+
+    - name: "Create calendars directories"
+      file:
+        path: "{{ item }}"
+        state: "directory"
+        owner: "www-data"
+        group: "staff"
+        mode: "u=rwx,g=rwxs,o=rx"
+      with_items:
+        - "{{ calendars_install_path }}"
+        - "{{ calendars_backup_path  }}"
+        - "{{ calendars_site_home    }}"
+        - "/var/log/cron"
+
+    - name: "Install release"
+      command: "rsync -rlv /usr/local/src/calendars/ {{ calendars_install_path }}/"
+      when: release.changed
+
+    - name: "Update site_home"
+      command: "rsync -rl /usr/local/src/calendars/data/ {{ calendars_site_home }}/"
+      when: release.changed
+
+    - name: "Update site_config"
+      template:
+        src: "site_config.j2"
+        dest: "{{ calendars_site_home }}/site_config.inc"
+
+    - name: "Apache site configuration"
+      template:
+        src: "apache.conf"
+        dest: "/etc/apache2/sites-enabled/conf.d/calendars.conf"
+      notify: "apache_restart"
+
+    - name: "Install CRON"
+      template:
+        src: "cron.sh"
+        dest: "/etc/cron.daily/backup.d/calendars"
+        mode: "0755"
+
+    - name: "Configure backup credentials"
+      template:
+        src: "cron.cnf"
+        dest: "/etc/cron.daily/backup.d/calendars.cnf"
+        mode: "0600"
+
+    - name: "Update application permissions"
+      file:
+        path:  "{{ calendars_install_path }}"
+        state: "directory"
+        owner: "www-data"
+        group: "staff"
+        mode:  "u=rwX,g=rwX,o=rX"
+        recurse: "yes"
+
+    - name: "Update site_home permissions"
+      file:
+        path: "{{ calendars_site_home }}"
+        state: "directory"
+        owner: "www-data"
+        group: "staff"
+        mode:  "u=rwX,g=rwX,o=rX"
+        recurse: "yes"
+...

@@ -1,0 +1,73 @@
+<?php
+define('APPLICATION_NAME','Calendars');
+
+/**
+ * The URL to get to this site
+ * Do NOT use a trailing slash
+ */
+define('BASE_URL','{{ calendars_base_url }}');
+define('BASE_URI','{{ calendars_base_uri }}');
+
+/**
+ * Database Setup
+ */
+$DATABASES = [
+    'default' => [
+        'driver'   => 'Pdo_Mysql',
+        'dsn'      => 'mysql:dbname={{ calendars_db.name }};host={{ calendars_db.host }}',
+        'username' => '{{ calendars_db.user }}',
+        'password' => '{{ calendars_db.pass }}',
+        'options'  => []
+    ]
+];
+
+define('GOOGLE_CREDENTIALS_FILE', __DIR__.'/credentials.json');
+define('GOOGLE_USER_EMAIL', '{{ calendars_google.user }}');
+
+/**
+ * Directory Configuration
+ *
+ * This supports doing user authentication from multiple external
+ * directories, such as LDAP or ADS. This is required since city staff
+ * are in a seperate LDAP directory from public user accounts.
+ * Classes that implement ExternalIdentity should have an entry here.
+ *
+ * See: ExternalIdentity
+ */
+$DIRECTORY_CONFIG = [
+{% if calendars_site_config.directory_service %}
+  'Employee' => [
+      'DIRECTORY_SERVER' => '{{ calendars_site_config.directory_service }}'
+  ]
+{% endif %}
+];
+
+/**
+ * CAS authentication http://www.jasig.org/cas
+ *
+ * https://wiki.jasig.org/display/CASC/phpCAS
+ *
+ * phpCAS is a PHP library for handling the calls to the CAS service
+ * It is the official library, part of the Jasig CAS project
+ */
+{% if calendars_site_config.cas_host %}
+define('CAS', APPLICATION_HOME.'/vendor/jasig/phpcas/source');
+define('CAS_SERVER','{{ calendars_site_config.cas_host }}');
+define('CAS_URI','cas');
+{% endif %}
+
+define('DATE_FORMAT', 'n/j/Y H:i:s');
+define('LOCALE', 'en_US');
+
+/**
+ * Skidder is a web service for error loggin.  This application supports
+ * logging errors to a Skidder server.  You must register for an application_id
+ * on the skidder server you want to post errors to.
+ */
+{% if calendars_skidder.server %}
+$writer = new Blossom\Classes\Log\SkidderWriter('{{ calendars_skidder.server }}', {{ calendars_skidder.application_id }} );
+$LOGGER = new Zend\Log\Logger();
+$LOGGER->addWriter($writer);
+Zend\Log\Logger::registerErrorHandler($LOGGER);
+Zend\Log\Logger::registerExceptionHandler($LOGGER);
+{% endif %}

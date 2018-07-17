@@ -1,0 +1,29 @@
+---
+calendars_archive_path: "../build/calendars.tar.gz"
+calendars_install_path: "/srv/sites/calendars"
+calendars_backup_path:  "/srv/backups/calendars"
+calendars_site_home:    "{{ calendars_install_path }}/data"
+
+calendars_base_uri: "/calendars"
+calendars_base_url: "https://{{ ansible_host }}{{ calendars_base_uri }}"
+calendars_proxy: ""
+
+calendars_db:
+  type: "MYSQL"
+  port: 3306
+  host: "localhost"
+  name: "calendars"
+  user: "calendars"
+  pass: "{{ vault_calendars_db.pass }}"
+
+calendars_google:
+  user: ""
+
+calendars_site_config:
+  directory_service: ""
+  cas_host: ""
+
+calendars_skidder:
+  server: ""
+  application_id: ""
+...

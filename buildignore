@@ -1,12 +1,15 @@
+/ansible/roles
 /buildignore
 /build.sh
 /build
 /dist
 .git/
 .git*
+*.retry
 configuration.inc
 site_config.inc
 credentials.json
+/data/Google_Client
 /data/sessions/*
 /data/templates/
 /data/blocks/

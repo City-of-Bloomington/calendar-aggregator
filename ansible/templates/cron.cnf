@@ -1,0 +1,3 @@
+[mysqldump]
+user={{ calendars_db.user }}
+password={{ calendars_db.pass }}
