@@ -1,8 +1,7 @@
 <?php
 /**
- * @copyright 2015 City of Bloomington, Indiana
- * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE.txt
- * @author Cliff Ingham <inghamn@bloomington.in.gov>
+ * @copyright 2015-2020 City of Bloomington, Indiana
+ * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE
  */
 namespace Application\Controllers;
 use Application\Models\Aggregation;
@@ -16,7 +15,7 @@ class AggregationsController extends Controller
     public function index()
     {
         $table = new AggregationsTable();
-        $list = $table->find();
+        $list = $table->find(null, 'name');
 
         $this->template->blocks[] = new Block('aggregations/list.inc', ['aggregations'=>$list]);
     }

@@ -1,8 +1,7 @@
 <?php
 /**
- * @copyright 2015 City of Bloomington, Indiana
- * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE.txt
- * @author Cliff Ingham <inghamn@bloomington.in.gov>
+ * @copyright 2015-2020 City of Bloomington, Indiana
+ * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE
  */
 namespace Application\Models;
 use Blossom\Classes\ActiveRecord;
@@ -81,7 +80,7 @@ class Aggregation extends ActiveRecord
 	public function getAggregatedCalendars()
 	{
         $table = new AggregatedCalendarsTable();
-        return $table->find(['aggregation_id'=>$this->getId()]);
+        return $table->find(['aggregation_id'=>$this->getId()], 'name');
 	}
 
 	public function sync()
