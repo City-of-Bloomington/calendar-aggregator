@@ -32,14 +32,14 @@ class Aggregation extends ActiveRecord
 				$this->exchangeArray($id);
 			}
 			else {
-				$zend_db = Database::getConnection();
+				$db = Database::getConnection();
 				if (ActiveRecord::isId($id)) {
 					$sql = 'select * from aggregations where id=?';
 				}
 				else {
 					$sql = 'select * from aggregations where google_calendar_id=?';
 				}
-				$result = $zend_db->createStatement($sql)->execute([$id]);
+				$result = $db->createStatement($sql)->execute([$id]);
 				if (count($result)) {
 					$this->exchangeArray($result->current());
 				}

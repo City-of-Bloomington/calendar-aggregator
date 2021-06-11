@@ -20,8 +20,8 @@ if ($route) {
 
         $role = isset($_SESSION['USER']) ? $_SESSION['USER']->getRole() : 'Anonymous';
 
-        if (   $ZEND_ACL->hasResource($route->params['controller'])
-            && $ZEND_ACL->isAllowed($role, $route->params['controller'], $route->params['action'])) {
+        if (   $ACL->hasResource($route->params['controller'])
+            && $ACL->isAllowed($role, $route->params['controller'], $route->params['action'])) {
 
             $controller = 'Application\\Controllers\\'.ucfirst($route->params['controller']).'Controller';
             $action     = $route->params['action'];

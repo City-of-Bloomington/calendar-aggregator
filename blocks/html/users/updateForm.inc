@@ -40,8 +40,8 @@ $title = $this->user->getId() ? $this->_('user_edit') : $this->_('user_add');
             <dl><dt><label  for="role"><?= $this->_('role'); ?></label></dt>
                 <dd><select name="role" id="role"><option></option>
                     <?php
-                        global $ZEND_ACL;
-                        foreach (array_reverse($ZEND_ACL->getRoles()) as $role) {
+                        global $ACL;
+                        foreach (array_reverse($ACL->getRoles()) as $role) {
                             $selected = $this->user->getRole()==$role
                                 ? 'selected="selected"'
                                 : '';

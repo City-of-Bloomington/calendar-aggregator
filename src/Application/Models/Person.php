@@ -32,7 +32,7 @@ class Person extends ActiveRecord
 				$this->exchangeArray($id);
 			}
 			else {
-				$zend_db = Database::getConnection();
+				$db = Database::getConnection();
 				if (ActiveRecord::isId($id)) {
 					$sql = 'select * from people where id=?';
 				}
@@ -42,7 +42,7 @@ class Person extends ActiveRecord
 				else {
 					$sql = 'select * from people where username=?';
 				}
-				$result = $zend_db->createStatement($sql)->execute([$id]);
+				$result = $db->createStatement($sql)->execute([$id]);
 				if (count($result)) {
 					$this->exchangeArray($result->current());
 				}
@@ -209,8 +209,8 @@ class Person extends ActiveRecord
 	/**
 	 * Checks if the user is supposed to have acces to the resource
 	 *
-	 * This is implemented by checking against a Zend_Acl object
-	 * The Zend_Acl should be created in configuration.inc
+	 * This is implemented by checking against a ACL object
+	 * The ACL should be created in configuration.inc
 	 *
 	 * @param string $resource
 	 * @param string $action
@@ -218,12 +218,12 @@ class Person extends ActiveRecord
 	 */
 	public static function isAllowed($resource, $action=null)
 	{
-		global $ZEND_ACL;
+		global $ACL;
 		$role = 'Anonymous';
 		if (isset($_SESSION['USER']) && $_SESSION['USER']->getRole()) {
 			$role = $_SESSION['USER']->getRole();
 		}
-		return $ZEND_ACL->isAllowed($role, $resource, $action);
+		return $ACL->isAllowed($role, $resource, $action);
 	}
 
 	//----------------------------------------------------------------

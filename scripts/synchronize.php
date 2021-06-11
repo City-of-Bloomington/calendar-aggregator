@@ -5,8 +5,8 @@
  */
 use Application\Models\AggregatedCalendarsTable;
 use Application\Models\GoogleGateway;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
+use Laminas\Log\Logger;
+use Laminas\Log\Writer\Stream;
 
 include __DIR__.'/../bootstrap.php';
 

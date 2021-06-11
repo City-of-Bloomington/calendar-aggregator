@@ -13,8 +13,8 @@ namespace Application\Models;
 use Blossom\Classes\ActiveRecord;
 use Blossom\Classes\Database;
 use Recurr\Rule;
-use Zend\Log\Logger;
-use Zend\Log\LoggerInterface;
+use Laminas\Log\Logger;
+use Laminas\Log\LoggerInterface;
 
 class GoogleGateway
 {

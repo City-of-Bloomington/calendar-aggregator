@@ -4,12 +4,12 @@
  * @license http://www.gnu.org/licenses/agpl.txt GNU/AGPL, see LICENSE.txt
  * @author Cliff Ingham <inghamn@bloomington.in.gov>
  */
-use Zend\Permissions\Acl\Acl;
-use Zend\Permissions\Acl\Role\GenericRole as Role;
-use Zend\Permissions\Acl\Resource\GenericResource as Resource;
+use Laminas\Permissions\Acl\Acl;
+use Laminas\Permissions\Acl\Role\GenericRole as Role;
+use Laminas\Permissions\Acl\Resource\GenericResource as Resource;
 
-$ZEND_ACL = new Acl();
-$ZEND_ACL->addRole(new Role('Anonymous'))
+$ACL = new Acl();
+$ACL->addRole(new Role('Anonymous'))
 		 ->addRole(new Role('Public'), 'Anonymous')
 		 ->addRole(new Role('Staff'), 'Public')
 		 ->addRole(new Role('Administrator'), 'Staff');
@@ -17,27 +17,27 @@ $ZEND_ACL->addRole(new Role('Anonymous'))
 /**
  * Declare all the resources
  */
-$ZEND_ACL->addResource(new Resource('index'));
-$ZEND_ACL->addResource(new Resource('people'));
-$ZEND_ACL->addResource(new Resource('users'));
-$ZEND_ACL->addResource(new Resource('login'));
+$ACL->addResource(new Resource('index'));
+$ACL->addResource(new Resource('people'));
+$ACL->addResource(new Resource('users'));
+$ACL->addResource(new Resource('login'));
 
-$ZEND_ACL->addResource(new Resource('aggregations'));
-$ZEND_ACL->addResource(new Resource('aggregatedCalendars'));
+$ACL->addResource(new Resource('aggregations'));
+$ACL->addResource(new Resource('aggregatedCalendars'));
 
 /**
  * Assign permissions to the resources
  */
-$ZEND_ACL->allow(null,'login');
+$ACL->allow(null,'login');
 
 // Permissions for unauthenticated browsing
-$ZEND_ACL->allow(null, ['index'], ['index']);
-$ZEND_ACL->allow(null, ['aggregations'], ['index', 'view']);
+$ACL->allow(null, ['index'], ['index']);
+$ACL->allow(null, ['aggregations'], ['index', 'view']);
 
 // Allow Staff to do stuff
-$ZEND_ACL->allow('Staff', ['people'], ['index','view']);
-$ZEND_ACL->allow('Staff', ['aggregations'], ['update']);
+$ACL->allow('Staff', ['people'], ['index','view']);
+$ACL->allow('Staff', ['aggregations'], ['update']);
 
 
 // Administrator is allowed access to everything
-$ZEND_ACL->allow('Administrator');
+$ACL->allow('Administrator');

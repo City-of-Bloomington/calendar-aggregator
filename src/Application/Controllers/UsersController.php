@@ -10,8 +10,8 @@ use Application\Models\PeopleTable;
 use Blossom\Classes\Controller;
 use Blossom\Classes\Block;
 use Blossom\Classes\Database;
-use Zend\Paginator\Paginator;
-use Zend\Paginator\Adapter\DbSelect;
+use Laminas\Paginator\Paginator;
+use Laminas\Paginator\Adapter\DbSelect;
 
 class UsersController extends Controller
 {

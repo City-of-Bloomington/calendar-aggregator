@@ -7,7 +7,7 @@
 namespace Application\Models;
 
 use Blossom\Classes\TableGateway;
-use Zend\Db\Sql\Select;
+use Laminas\Db\Sql\Select;
 
 class PeopleTable extends TableGateway
 {
