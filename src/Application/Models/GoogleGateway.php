@@ -163,7 +163,12 @@ class GoogleGateway
             }
         }
         else {
-            $response = $service->events->patch($calendarId, $eventId, $patch);
+            try {
+                $response = $service->events->patch($calendarId, $eventId, $patch);
+            }
+            catch (\Exception $e) {
+                // Ignore errors
+            }
         }
 
         return $response;
@@ -235,7 +240,7 @@ class GoogleGateway
 	{
         $service = self::getService();
         $opts    = [ 'fields'       => 'items(attendees,id,organizer),nextPageToken',
-                     'showDeleted'  => true,
+                     'showDeleted'  => false,
                      'singleEvents' => false
                    ];
         $pageToken = 1;
