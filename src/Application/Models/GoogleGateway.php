@@ -193,9 +193,12 @@ class GoogleGateway
         $logger  = self::getLogger();
         $service = self::getService();
 
-        $opts    = [ 'fields'       => 'items(attendees,id,organizer,status),nextPageToken',
+        $timeMin = new \DateTime();
+
+        $opts    = [ 'fields'       => 'items(attendees,id,organizer,status,start),nextPageToken',
                      'showDeleted'  => false,
-                     'singleEvents' => false
+                     'singleEvents' => false,
+                     'timeMin'      => $timeMin->format(DATETIME_FORMAT)
                    ];
         $pageToken = 1;
 
@@ -207,10 +210,13 @@ class GoogleGateway
             foreach ($events as $event) {
                 # Create a patch
                 $attendees = $event->getAttendees();
+                $extra     = ['calendarId'=>$calendarId, 'eventId'=>$event->id];
 
                 if (self::hasAttendee($attendees, $attendee->getEmail()) === false) {
                     $organizer = $event->getOrganizer();
+                    $start     = $event->getStart();
                     if ($organizer) {
+                        $logger->log(Logger::INFO, "$calendarId: {$start->dateTime} adding {$attendee->getEmail()}", $extra);
                         $attendees[] = $attendee;
                         $patch = new \Google_Service_Calendar_Event();
                         $patch->setAttendees($attendees);
@@ -219,10 +225,6 @@ class GoogleGateway
                     }
                     else {
                         if ($event->getStatus() == self::STATUS_CONFIRMED) {
-                            $extra = [
-                                'calendarId' => $calendarId,
-                                'eventId'    => $event->id
-                            ];
                             $logger->log(Logger::ERR, "Event with no organizer", $extra);
                         }
                     }
