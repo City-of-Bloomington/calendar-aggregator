@@ -208,20 +208,33 @@ class GoogleGateway
             $events = $service->events->listEvents($calendarId, $opts);
 
             foreach ($events as $event) {
-                # Create a patch
                 $attendees = $event->getAttendees();
                 $extra     = ['calendarId'=>$calendarId, 'eventId'=>$event->id];
 
                 if (self::hasAttendee($attendees, $attendee->getEmail()) === false) {
                     $organizer = $event->getOrganizer();
-                    $start     = $event->getStart();
-                    if ($organizer) {
-                        $logger->log(Logger::INFO, "$calendarId: {$start->dateTime} adding {$attendee->getEmail()}", $extra);
-                        $attendees[] = $attendee;
-                        $patch = new \Google_Service_Calendar_Event();
-                        $patch->setAttendees($attendees);
 
-                        self::patchEvent($organizer->getEmail(), $event->id, $patch);
+                    if ($organizer) {
+                        // If this event is from an aggregation, the organizer will be different from the $calendarId
+                        // Aggregation event attendees do not include all the real attendees.
+                        // The original event must be loaded to check attendees
+                        $source_id = $calendarId;
+                        $fullevent = null;
+
+                        if ($organizer->email != $calendarId) {
+                            $fullevent  = $service->events->get($organizer->email, $event->id);
+                            $attendees  = $fullevent->getAttendees();
+                            $source_id  = $organizer->email;
+                            if (self::hasAttendee($attendees, $attendee->getEmail()) !== false) {
+                                continue; // Already attended the upstream event
+                            }
+                        }
+
+                        $logger->log(Logger::INFO, "$source_id: {$event->start->dateTime} adding {$attendee->getEmail()}", $extra);
+                        $attendees[] = $attendee;
+                        if (!$fullevent) { $fullevent = $service->events->get($source_id, $event->id); }
+                        $fullevent->setAttendees($attendees);
+                        $service->events->update($source_id, $event->id, $fullevent);
                     }
                     else {
                         if ($event->getStatus() == self::STATUS_CONFIRMED) {

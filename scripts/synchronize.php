@@ -21,6 +21,6 @@ GoogleGateway::setLogger($logger);
 $table = new AggregatedCalendarsTable();
 $list = $table->find();
 foreach ($list as $calendar) {
-    fwrite($log, "Attendee: {$calendar->getAggregation()->getName()} Calendar: {$calendar->getName()}\n");
+    fwrite($log, "Attendee: {$calendar->getAggregation()->getName()} | Calendar: {$calendar->getName()}\n");
     $calendar->attendAllEvents();
 }
