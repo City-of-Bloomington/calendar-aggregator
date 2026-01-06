@@ -10,6 +10,6 @@ log=/var/log/cron/$app_name
 #----------------------------------------------------------
 # Synchronize
 #----------------------------------------------------------
-SITE_HOME=$data_dir php $install_dir/scripts/synchronize.php
+SITE_HOME=$data_dir php $install_dir/scripts/synchronize.php >> $data_dir/sync.log 2>&1
 chown -R www-data:staff $data_dir
 chmod -R g+rwX $data_dir
