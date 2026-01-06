@@ -1,19 +1,10 @@
 APPNAME=calendars
-
-SASS := $(shell command -v pysassc 2> /dev/null)
-MSGFMT := $(shell command -v msgfmt 2> /dev/null)
+REQS := sassc msgfmt
+K := $(foreach r, ${REQS}, $(if $(shell command -v ${r} 2> /dev/null), '', $(error "${r} not installed")))
 
 LANGUAGES := $(wildcard language/*/LC_MESSAGES)
 
 default: clean compile package
-
-deps:
-ifndef SASS
-	$(error "pysassc is not installed")
-endif
-ifndef MSGFMT
-	$(error "msgfmt is not installed, please install gettext")
-endif
 
 clean:
 	rm -Rf build
@@ -21,13 +12,13 @@ clean:
 
 	rm -Rf public/css/.sass-cache
 
-compile: deps $(LANGUAGES)
-	pysassc -t compact -m public/css/screen.scss public/css/screen.css
+compile: $(LANGUAGES)
+	cd public/css && sassc -t compact -m screen.scss screen.css
 
 package:
 	rsync -rl --exclude-from=buildignore --delete . build/$(APPNAME)
 	cd build && tar czf $(APPNAME).tar.gz $(APPNAME)
 
-$(LANGUAGES): deps
+$(LANGUAGES):
 	cd $@ && msgfmt -cv *.po
 
