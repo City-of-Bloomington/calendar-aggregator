@@ -198,7 +198,7 @@ class GoogleGateway
         $opts    = [ 'fields'       => 'items(attendees,id,organizer,status,start),nextPageToken',
                      'showDeleted'  => false,
                      'singleEvents' => false,
-                     'timeMin'      => $timeMin->format(DATETIME_FORMAT)
+                     'timeMin'      => $timeMin->format(self::DATETIME_FORMAT)
                    ];
         $pageToken = 1;
 
