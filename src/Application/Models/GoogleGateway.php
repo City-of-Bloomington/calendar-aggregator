@@ -15,6 +15,7 @@ use Blossom\Classes\Database;
 use Recurr\Rule;
 use Zend\Log\Logger;
 use Zend\Log\LoggerInterface;
+use Zend\Log\Writer\Stream;
 
 class GoogleGateway
 {
@@ -28,12 +29,12 @@ class GoogleGateway
     const STATUS_CANCELLED = 'cancelled';
 
     public static $logger;
-    public static function setLogger(LoggerInterface $logger) { self::$logger = $logger; }
     public static function getLogger() {
-        global $LOGGER;
-
-        if (!self::$logger && isset($LOGGER)) {
-            self::setLogger($LOGGER);
+        if (!self::$logger) {
+            $log    =      fopen(SITE_HOME.'/sync.log', 'a');
+            $writer = new Stream(SITE_HOME.'/sync.log');
+            self::$logger = new Logger();
+            self::$logger->addWriter($writer);
         }
         return self::$logger;
     }

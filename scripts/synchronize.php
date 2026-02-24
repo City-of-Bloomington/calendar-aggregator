@@ -10,17 +10,12 @@ use Zend\Log\Writer\Stream;
 
 include __DIR__.'/../bootstrap.php';
 
-$log    =      fopen(SITE_HOME.'/sync.log', 'a');
-$writer = new Stream(SITE_HOME.'/sync.log');
-$logger = new Logger();
-$logger->addWriter($writer);
+$logger = GoogleGateway::getLogger();
 $logger->log(Logger::INFO, 'Synchronize');
-
-GoogleGateway::setLogger($logger);
 
 $table = new AggregatedCalendarsTable();
 $list = $table->find();
 foreach ($list as $calendar) {
-    fwrite($log, "Attendee: {$calendar->getAggregation()->getName()} | Calendar: {$calendar->getName()}\n");
+    $logger->log(Logger::INFO, "Attendee: {$calendar->getAggregation()->getName()} | Calendar: {$calendar->getName()}");
     $calendar->attendAllEvents();
 }
