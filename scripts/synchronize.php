@@ -5,17 +5,14 @@
  */
 use Application\Models\AggregatedCalendarsTable;
 use Application\Models\GoogleGateway;
-use Zend\Log\Logger;
-use Zend\Log\Writer\Stream;
 
 include __DIR__.'/../bootstrap.php';
 
-$logger = GoogleGateway::getLogger();
-$logger->log(Logger::INFO, 'Synchronize');
+$log = GoogleGateway::getLog();
 
 $table = new AggregatedCalendarsTable();
 $list = $table->find();
 foreach ($list as $calendar) {
-    $logger->log(Logger::INFO, "Attendee: {$calendar->getAggregation()->getName()} | Calendar: {$calendar->getName()}");
+    fwrite($log, date(GoogleGateway::DATETIME_FORMAT)." INFO Attendee: {$calendar->getAggregation()->getName()} | Calendar: {$calendar->getName()}\n");
     $calendar->attendAllEvents();
 }

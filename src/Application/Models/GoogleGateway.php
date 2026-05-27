@@ -13,9 +13,6 @@ namespace Application\Models;
 use Blossom\Classes\ActiveRecord;
 use Blossom\Classes\Database;
 use Recurr\Rule;
-use Zend\Log\Logger;
-use Zend\Log\LoggerInterface;
-use Zend\Log\Writer\Stream;
 
 class GoogleGateway
 {
@@ -28,15 +25,13 @@ class GoogleGateway
     const STATUS_CONFIRMED = 'confirmed';
     const STATUS_CANCELLED = 'cancelled';
 
-    public static $logger;
-    public static function getLogger() {
-        if (!self::$logger) {
-            $log    =      fopen(SITE_HOME.'/sync.log', 'a');
-            $writer = new Stream(SITE_HOME.'/sync.log');
-            self::$logger = new Logger();
-            self::$logger->addWriter($writer);
+    public static $log;
+    public static function getLog()
+    {
+        if (!self::$log) {
+             self::$log = fopen(SITE_HOME.'/sync.log', 'a');
         }
-        return self::$logger;
+        return self::$log;
     }
 
     private static $client;
@@ -147,20 +142,22 @@ class GoogleGateway
      */
     public static function patchEvent($calendarId, $eventId, \Google_Service_Calendar_Event $patch)
     {
-        $logger   = self::getLogger();
+        $log      = self::getLog();
         $service  = self::getService();
         $response = null;
 
-        if ($logger) {
+        if ($log) {
             $extra = ['calendarId'=>$calendarId, 'eventId'=>$eventId];
             try {
                 $response = $service->events->patch($calendarId, $eventId, $patch);
                 if (!$response instanceof \Google_Service_Calendar_Event) {
-                    $logger->log(Logger::WARN, 'patch/unknownResponse', $extra);
+                    fwrite($log, date(self::DATETIME_FORMAT)." INFO path/unknownResponse\n");
+                    fwrite($log, print_r($extra, true));
                 }
             }
             catch (\Exception $e) {
-                $logger->log(Logger::ERR, $e->getMessage(), $extra);
+                fwrite($log, date(self::DATETIME_FORMAT)." ERR {$e->getMessage()}");
+                fwrite($log, print_r($extra, true));
             }
         }
         else {
@@ -191,7 +188,7 @@ class GoogleGateway
 	 */
 	public static function attendAllEvents($calendarId, \Google_Service_Calendar_EventAttendee $attendee)
 	{
-        $logger  = self::getLogger();
+        $log     = self::getLog();
         $service = self::getService();
 
         $timeMin = new \DateTime();
@@ -231,15 +228,24 @@ class GoogleGateway
                             }
                         }
 
-                        $logger->log(Logger::INFO, "$source_id: {$event->start->dateTime} adding {$attendee->getEmail()}", $extra);
+                        fwrite($log, date(self::DATETIME_FORMAT)." INFO $source_id: {$event->start->dateTime} adding {$attendee->getEmail()}\n");
+                        fwrite($log, print_r($extra, true));
+
                         $attendees[] = $attendee;
                         if (!$fullevent) { $fullevent = $service->events->get($source_id, $event->id); }
                         $fullevent->setAttendees($attendees);
-                        $service->events->update($source_id, $event->id, $fullevent);
+                        try {
+                            $service->events->update($source_id, $event->id, $fullevent);
+                        }
+                        catch (\Exception $e) {
+                            fwrite($log, date(self::DATETIME_FORMAT)." ERR {$e->getMessage()}\n");
+                            fwrite($log, print_r($fullevent, true));
+                        }
                     }
                     else {
                         if ($event->getStatus() == self::STATUS_CONFIRMED) {
-                            $logger->log(Logger::ERR, "Event with no organizer", $extra);
+                            fwrite($log, date(self::DATETIME_FORMAT)." ERR Event with no organizer\n");
+                            fwrite($log, print_r($extra, true));
                         }
                     }
                 }
